@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                   xmlns:drools="http://www.jboss.org/drools"
+                   id="Definitions_SO1"
+                   targetNamespace="http://www.example.org/bamoe/service-order-1"
+                   exporter="BAMOE"
+                   exporterVersion="9.1.0">
+  
+  <bpmn2:process id="ServiceOrder1Subprocess" name="Service Order 1 처리" isExecutable="true" drools:packageName="com.example.productorder.subprocess">
+    
+    <!-- Process Variables -->
+    <bpmn2:property id="serviceOrder1" name="serviceOrder1" itemSubjectRef="ItemDefinition_ServiceOrder"/>
+    <bpmn2:property id="resourceOrders" name="resourceOrders" itemSubjectRef="ItemDefinition_ResourceOrderList"/>
+    <bpmn2:property id="ro11Result" name="ro11Result" itemSubjectRef="ItemDefinition_String"/>
+    <bpmn2:property id="ro12Result" name="ro12Result" itemSubjectRef="ItemDefinition_String"/>
+    
+    <!-- Start Event -->
+    <bpmn2:startEvent id="StartEvent_SO1" name="S01 시작">
+      <bpmn2:outgoing>SequenceFlow_SO1_1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    
+    <!-- Parallel Gateway: RO 발생 시작 -->
+    <bpmn2:parallelGateway id="ParallelGateway_RO1_Start" name="RO 발생 시작" gatewayDirection="Diverging">
+      <bpmn2:incoming>SequenceFlow_SO1_1</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_RO11</bpmn2:outgoing>
+      <bpmn2:outgoing>SequenceFlow_RO12</bpmn2:outgoing>
+    </bpmn2:parallelGateway>
+    
+    <!-- Service Task: Resource Order 1-1 -->
+    <bpmn2:serviceTask id="ServiceTask_RO11" name="Resource Order 1-1" drools:taskName="ProcessResourceOrder11">
+      <bpmn2:incoming>SequenceFlow_RO11</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_RO11_Complete</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_RO11" name="resourceOrder11"/>
+        <bpmn2:dataOutput id="DataOutput_RO11" name="ro11Result"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_RO11</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_RO11</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+    </bpmn2:serviceTask>
+    
+    <!-- Service Task: Resource Order 1-2 -->
+    <bpmn2:serviceTask id="ServiceTask_RO12" name="Resource Order 1-2" drools:taskName="ProcessResourceOrder12">
+      <bpmn2:incoming>SequenceFlow_RO12</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_RO12_Complete</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_RO12" name="resourceOrder12"/>
+        <bpmn2:dataOutput id="DataOutput_RO12" name="ro12Result"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_RO12</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_RO12</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+    </bpmn2:serviceTask>
+    
+    <!-- Parallel Gateway: RO 완료 대기 -->
+    <bpmn2:parallelGateway id="ParallelGateway_RO1_End" name="RO 완료 대기" gatewayDirection="Converging">
+      <bpmn2:incoming>SequenceFlow_RO11_Complete</bpmn2:incoming>
+      <bpmn2:incoming>SequenceFlow_RO12_Complete</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_SO1_2</bpmn2:outgoing>
+    </bpmn2:parallelGateway>
+    
+    <!-- User Task: S01 승인 -->
+    <bpmn2:userTask id="UserTask_SO1_Approval" name="S01 승인" drools:taskName="ApproveServiceOrder1">
+      <bpmn2:incoming>SequenceFlow_SO1_2</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_SO1_3</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_SO1_Approval" name="serviceOrder1"/>
+        <bpmn2:dataInput id="DataInput_RO_Results" name="resourceOrderResults"/>
+        <bpmn2:dataOutput id="DataOutput_SO1_Approval" name="approvalDecision"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_SO1_Approval</bpmn2:dataInputRefs>
+          <bpmn2:dataInputRefs>DataInput_RO_Results</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_SO1_Approval</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+      <bpmn2:potentialOwner>
+        <bpmn2:resourceAssignmentExpression>
+          <bpmn2:formalExpression>serviceOrderApprover</bpmn2:formalExpression>
+        </bpmn2:resourceAssignmentExpression>
+      </bpmn2:potentialOwner>
+    </bpmn2:userTask>
+    
+    <!-- End Event -->
+    <bpmn2:endEvent id="EndEvent_SO1" name="S01 완료">
+      <bpmn2:incoming>SequenceFlow_SO1_3</bpmn2:incoming>
+    </bpmn2:endEvent>
+    
+    <!-- Sequence Flows -->
+    <bpmn2:sequenceFlow id="SequenceFlow_SO1_1" sourceRef="StartEvent_SO1" targetRef="ParallelGateway_RO1_Start"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_RO11" sourceRef="ParallelGateway_RO1_Start" targetRef="ServiceTask_RO11"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_RO12" sourceRef="ParallelGateway_RO1_Start" targetRef="ServiceTask_RO12"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_RO11_Complete" sourceRef="ServiceTask_RO11" targetRef="ParallelGateway_RO1_End"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_RO12_Complete" sourceRef="ServiceTask_RO12" targetRef="ParallelGateway_RO1_End"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_SO1_2" sourceRef="ParallelGateway_RO1_End" targetRef="UserTask_SO1_Approval"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_SO1_3" sourceRef="UserTask_SO1_Approval" targetRef="EndEvent_SO1"/>
+    
+  </bpmn2:process>
+  
+  <!-- Item Definitions -->
+  <bpmn2:itemDefinition id="ItemDefinition_ServiceOrder" structureRef="com.example.productorder.model.ServiceOrder"/>
+  <bpmn2:itemDefinition id="ItemDefinition_ResourceOrderList" structureRef="java.util.List"/>
+  <bpmn2:itemDefinition id="ItemDefinition_String" structureRef="java.lang.String"/>
+  
+  <!-- BPMN Diagram (Visual Layout) -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_SO1">
+    <bpmndi:BPMNPlane id="BPMNPlane_SO1" bpmnElement="ServiceOrder1Subprocess">
+      
+      <!-- Start Event -->
+      <bpmndi:BPMNShape id="StartEvent_SO1_di" bpmnElement="StartEvent_SO1">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="90" y="243" width="56" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Parallel Gateway: RO Start -->
+      <bpmndi:BPMNShape id="ParallelGateway_RO1_Start_di" bpmnElement="ParallelGateway_RO1_Start">
+        <dc:Bounds x="200" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="190" y="250" width="70" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Service Task: RO 1-1 -->
+      <bpmndi:BPMNShape id="ServiceTask_RO11_di" bpmnElement="ServiceTask_RO11">
+        <dc:Bounds x="320" y="100" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Service Task: RO 1-2 -->
+      <bpmndi:BPMNShape id="ServiceTask_RO12_di" bpmnElement="ServiceTask_RO12">
+        <dc:Bounds x="320" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Parallel Gateway: RO End -->
+      <bpmndi:BPMNShape id="ParallelGateway_RO1_End_di" bpmnElement="ParallelGateway_RO1_End">
+        <dc:Bounds x="500" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="490" y="250" width="70" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- User Task: SO1 Approval -->
+      <bpmndi:BPMNShape id="UserTask_SO1_Approval_di" bpmnElement="UserTask_SO1_Approval">
+        <dc:Bounds x="620" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- End Event -->
+      <bpmndi:BPMNShape id="EndEvent_SO1_di" bpmnElement="EndEvent_SO1">
+        <dc:Bounds x="790" y="200" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="780" y="243" width="56" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Sequence Flow Edges -->
+      <bpmndi:BPMNEdge id="SequenceFlow_SO1_1_di" bpmnElement="SequenceFlow_SO1_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_RO11_di" bpmnElement="SequenceFlow_RO11">
+        <di:waypoint x="225" y="193"/>
+        <di:waypoint x="225" y="140"/>
+        <di:waypoint x="320" y="140"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_RO12_di" bpmnElement="SequenceFlow_RO12">
+        <di:waypoint x="225" y="243"/>
+        <di:waypoint x="225" y="300"/>
+        <di:waypoint x="320" y="300"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_RO11_Complete_di" bpmnElement="SequenceFlow_RO11_Complete">
+        <di:waypoint x="420" y="140"/>
+        <di:waypoint x="525" y="140"/>
+        <di:waypoint x="525" y="193"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_RO12_Complete_di" bpmnElement="SequenceFlow_RO12_Complete">
+        <di:waypoint x="420" y="300"/>
+        <di:waypoint x="525" y="300"/>
+        <di:waypoint x="525" y="243"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_SO1_2_di" bpmnElement="SequenceFlow_SO1_2">
+        <di:waypoint x="550" y="218"/>
+        <di:waypoint x="620" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_SO1_3_di" bpmnElement="SequenceFlow_SO1_3">
+        <di:waypoint x="720" y="218"/>
+        <di:waypoint x="790" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  
+</bpmn2:definitions>
+
+<!-- Made with Bob -->

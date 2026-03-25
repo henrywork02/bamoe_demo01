@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                   xmlns:drools="http://www.jboss.org/drools"
+                   id="Definitions_1"
+                   targetNamespace="http://www.example.org/bamoe/product-order"
+                   exporter="BAMOE"
+                   exporterVersion="9.1.0">
+  
+  <bpmn2:process id="ProductOrderProcess" name="Product Order 처리 프로세스" isExecutable="true" drools:packageName="com.example.productorder">
+    
+    <!-- Process Variables -->
+    <bpmn2:property id="productOrder" name="productOrder" itemSubjectRef="ItemDefinition_ProductOrder"/>
+    <bpmn2:property id="paymentInfo" name="paymentInfo" itemSubjectRef="ItemDefinition_PaymentInfo"/>
+    <bpmn2:property id="serviceOrders" name="serviceOrders" itemSubjectRef="ItemDefinition_ServiceOrderList"/>
+    <bpmn2:property id="validationResult" name="validationResult" itemSubjectRef="ItemDefinition_Boolean"/>
+    <bpmn2:property id="paymentValid" name="paymentValid" itemSubjectRef="ItemDefinition_Boolean"/>
+    
+    <!-- Start Event -->
+    <bpmn2:startEvent id="StartEvent_1" name="Product Order 접수">
+      <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    
+    <!-- User Task: Product Order 검증 -->
+    <bpmn2:userTask id="UserTask_Validation" name="Product Order 검증" drools:taskName="ValidateProductOrder">
+      <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_ProductOrder" name="productOrder"/>
+        <bpmn2:dataOutput id="DataOutput_ValidationResult" name="validationResult"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_ProductOrder</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_ValidationResult</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+      <bpmn2:potentialOwner>
+        <bpmn2:resourceAssignmentExpression>
+          <bpmn2:formalExpression>orderValidator</bpmn2:formalExpression>
+        </bpmn2:resourceAssignmentExpression>
+      </bpmn2:potentialOwner>
+    </bpmn2:userTask>
+    
+    <!-- Business Rule Task: 결제 발번 (DMN) -->
+    <bpmn2:businessRuleTask id="BusinessRuleTask_Payment" name="결제 발번 (DMN)" drools:ruleFlowGroup="payment-rules">
+      <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_OrderAmount" name="orderAmount"/>
+        <bpmn2:dataInput id="DataInput_CustomerGrade" name="customerGrade"/>
+        <bpmn2:dataOutput id="DataOutput_PaymentInfo" name="paymentInfo"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_OrderAmount</bpmn2:dataInputRefs>
+          <bpmn2:dataInputRefs>DataInput_CustomerGrade</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_PaymentInfo</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+    </bpmn2:businessRuleTask>
+    
+    <!-- Exclusive Gateway: 결제 검증 -->
+    <bpmn2:exclusiveGateway id="ExclusiveGateway_PaymentCheck" name="결제 검증" gatewayDirection="Diverging">
+      <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_PaymentValid</bpmn2:outgoing>
+      <bpmn2:outgoing>SequenceFlow_PaymentInvalid</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    
+    <!-- End Event: 결제 검증 종료 (실패) -->
+    <bpmn2:endEvent id="EndEvent_PaymentFailed" name="결제 검증 종료">
+      <bpmn2:incoming>SequenceFlow_PaymentInvalid</bpmn2:incoming>
+    </bpmn2:endEvent>
+    
+    <!-- Service Task: Service Order 분해 -->
+    <bpmn2:serviceTask id="ServiceTask_Decompose" name="Service Order 분해" drools:taskName="DecomposeServiceOrders">
+      <bpmn2:incoming>SequenceFlow_PaymentValid</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_ProductOrderDecompose" name="productOrder"/>
+        <bpmn2:dataOutput id="DataOutput_ServiceOrders" name="serviceOrders"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_ProductOrderDecompose</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_ServiceOrders</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+    </bpmn2:serviceTask>
+    
+    <!-- Parallel Gateway: SO 발생 시작 -->
+    <bpmn2:parallelGateway id="ParallelGateway_SOStart" name="SO 발생 시작" gatewayDirection="Diverging">
+      <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_SO1</bpmn2:outgoing>
+      <bpmn2:outgoing>SequenceFlow_SO2</bpmn2:outgoing>
+    </bpmn2:parallelGateway>
+    
+    <!-- Call Activity: Service Order 1 처리 -->
+    <bpmn2:callActivity id="CallActivity_SO1" name="Service Order 1 처리" calledElement="ServiceOrder1Subprocess">
+      <bpmn2:incoming>SequenceFlow_SO1</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_SO1_Complete</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_SO1" name="serviceOrder1"/>
+        <bpmn2:dataOutput id="DataOutput_SO1" name="serviceOrder1Result"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_SO1</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_SO1</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+    </bpmn2:callActivity>
+    
+    <!-- Call Activity: Service Order 2 처리 -->
+    <bpmn2:callActivity id="CallActivity_SO2" name="Service Order 2 처리" calledElement="ServiceOrder2Subprocess">
+      <bpmn2:incoming>SequenceFlow_SO2</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_SO2_Complete</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_SO2" name="serviceOrder2"/>
+        <bpmn2:dataOutput id="DataOutput_SO2" name="serviceOrder2Result"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_SO2</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_SO2</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+    </bpmn2:callActivity>
+    
+    <!-- Parallel Gateway: SO 완료 대기 -->
+    <bpmn2:parallelGateway id="ParallelGateway_SOEnd" name="SO 완료 대기" gatewayDirection="Converging">
+      <bpmn2:incoming>SequenceFlow_SO1_Complete</bpmn2:incoming>
+      <bpmn2:incoming>SequenceFlow_SO2_Complete</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_5</bpmn2:outgoing>
+    </bpmn2:parallelGateway>
+    
+    <!-- User Task: Product Order 작업 승인 -->
+    <bpmn2:userTask id="UserTask_Approval" name="Product Order 작업 승인" drools:taskName="ApproveProductOrder">
+      <bpmn2:incoming>SequenceFlow_5</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_6</bpmn2:outgoing>
+      <bpmn2:ioSpecification>
+        <bpmn2:dataInput id="DataInput_ApprovalOrder" name="productOrder"/>
+        <bpmn2:dataInput id="DataInput_ApprovalResults" name="serviceOrderResults"/>
+        <bpmn2:dataOutput id="DataOutput_ApprovalDecision" name="approvalDecision"/>
+        <bpmn2:inputSet>
+          <bpmn2:dataInputRefs>DataInput_ApprovalOrder</bpmn2:dataInputRefs>
+          <bpmn2:dataInputRefs>DataInput_ApprovalResults</bpmn2:dataInputRefs>
+        </bpmn2:inputSet>
+        <bpmn2:outputSet>
+          <bpmn2:dataOutputRefs>DataOutput_ApprovalDecision</bpmn2:dataOutputRefs>
+        </bpmn2:outputSet>
+      </bpmn2:ioSpecification>
+      <bpmn2:potentialOwner>
+        <bpmn2:resourceAssignmentExpression>
+          <bpmn2:formalExpression>orderApprover</bpmn2:formalExpression>
+        </bpmn2:resourceAssignmentExpression>
+      </bpmn2:potentialOwner>
+    </bpmn2:userTask>
+    
+    <!-- End Event: Product Order 완료 -->
+    <bpmn2:endEvent id="EndEvent_Complete" name="Product Order 완료">
+      <bpmn2:incoming>SequenceFlow_6</bpmn2:incoming>
+    </bpmn2:endEvent>
+    
+    <!-- Sequence Flows -->
+    <bpmn2:sequenceFlow id="SequenceFlow_1" sourceRef="StartEvent_1" targetRef="UserTask_Validation"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_2" sourceRef="UserTask_Validation" targetRef="BusinessRuleTask_Payment"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_3" sourceRef="BusinessRuleTask_Payment" targetRef="ExclusiveGateway_PaymentCheck"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_PaymentValid" name="결제 유효" sourceRef="ExclusiveGateway_PaymentCheck" targetRef="ServiceTask_Decompose">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">return paymentValid == true;</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="SequenceFlow_PaymentInvalid" name="결제 무효" sourceRef="ExclusiveGateway_PaymentCheck" targetRef="EndEvent_PaymentFailed">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">return paymentValid == false;</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="SequenceFlow_4" sourceRef="ServiceTask_Decompose" targetRef="ParallelGateway_SOStart"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_SO1" sourceRef="ParallelGateway_SOStart" targetRef="CallActivity_SO1"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_SO2" sourceRef="ParallelGateway_SOStart" targetRef="CallActivity_SO2"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_SO1_Complete" sourceRef="CallActivity_SO1" targetRef="ParallelGateway_SOEnd"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_SO2_Complete" sourceRef="CallActivity_SO2" targetRef="ParallelGateway_SOEnd"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_5" sourceRef="ParallelGateway_SOEnd" targetRef="UserTask_Approval"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_6" sourceRef="UserTask_Approval" targetRef="EndEvent_Complete"/>
+    
+  </bpmn2:process>
+  
+  <!-- Item Definitions -->
+  <bpmn2:itemDefinition id="ItemDefinition_ProductOrder" structureRef="com.example.productorder.model.ProductOrder"/>
+  <bpmn2:itemDefinition id="ItemDefinition_PaymentInfo" structureRef="com.example.productorder.model.PaymentInfo"/>
+  <bpmn2:itemDefinition id="ItemDefinition_ServiceOrderList" structureRef="java.util.List"/>
+  <bpmn2:itemDefinition id="ItemDefinition_Boolean" structureRef="java.lang.Boolean"/>
+  
+  <!-- BPMN Diagram (Visual Layout) -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="ProductOrderProcess">
+      
+      <!-- Start Event -->
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="100" y="200" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="80" y="243" width="76" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- User Task: Validation -->
+      <bpmndi:BPMNShape id="UserTask_Validation_di" bpmnElement="UserTask_Validation">
+        <dc:Bounds x="200" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Business Rule Task: Payment -->
+      <bpmndi:BPMNShape id="BusinessRuleTask_Payment_di" bpmnElement="BusinessRuleTask_Payment">
+        <dc:Bounds x="360" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Exclusive Gateway: Payment Check -->
+      <bpmndi:BPMNShape id="ExclusiveGateway_PaymentCheck_di" bpmnElement="ExclusiveGateway_PaymentCheck" isMarkerVisible="true">
+        <dc:Bounds x="520" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="520" y="250" width="50" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- End Event: Payment Failed -->
+      <bpmndi:BPMNShape id="EndEvent_PaymentFailed_di" bpmnElement="EndEvent_PaymentFailed">
+        <dc:Bounds x="527" y="80" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="507" y="50" width="76" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Service Task: Decompose -->
+      <bpmndi:BPMNShape id="ServiceTask_Decompose_di" bpmnElement="ServiceTask_Decompose">
+        <dc:Bounds x="640" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Parallel Gateway: SO Start -->
+      <bpmndi:BPMNShape id="ParallelGateway_SOStart_di" bpmnElement="ParallelGateway_SOStart">
+        <dc:Bounds x="800" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="790" y="250" width="70" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Call Activity: SO1 -->
+      <bpmndi:BPMNShape id="CallActivity_SO1_di" bpmnElement="CallActivity_SO1">
+        <dc:Bounds x="920" y="100" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Call Activity: SO2 -->
+      <bpmndi:BPMNShape id="CallActivity_SO2_di" bpmnElement="CallActivity_SO2">
+        <dc:Bounds x="920" y="260" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- Parallel Gateway: SO End -->
+      <bpmndi:BPMNShape id="ParallelGateway_SOEnd_di" bpmnElement="ParallelGateway_SOEnd">
+        <dc:Bounds x="1100" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1090" y="250" width="70" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- User Task: Approval -->
+      <bpmndi:BPMNShape id="UserTask_Approval_di" bpmnElement="UserTask_Approval">
+        <dc:Bounds x="1220" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      
+      <!-- End Event: Complete -->
+      <bpmndi:BPMNShape id="EndEvent_Complete_di" bpmnElement="EndEvent_Complete">
+        <dc:Bounds x="1390" y="200" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1370" y="243" width="76" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      
+      <!-- Sequence Flow Edges -->
+      <bpmndi:BPMNEdge id="SequenceFlow_1_di" bpmnElement="SequenceFlow_1">
+        <di:waypoint x="136" y="218"/>
+        <di:waypoint x="200" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_2_di" bpmnElement="SequenceFlow_2">
+        <di:waypoint x="300" y="218"/>
+        <di:waypoint x="360" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_3_di" bpmnElement="SequenceFlow_3">
+        <di:waypoint x="460" y="218"/>
+        <di:waypoint x="520" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_PaymentValid_di" bpmnElement="SequenceFlow_PaymentValid">
+        <di:waypoint x="570" y="218"/>
+        <di:waypoint x="640" y="218"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="580" y="200" width="50" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_PaymentInvalid_di" bpmnElement="SequenceFlow_PaymentInvalid">
+        <di:waypoint x="545" y="193"/>
+        <di:waypoint x="545" y="116"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="550" y="150" width="50" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_4_di" bpmnElement="SequenceFlow_4">
+        <di:waypoint x="740" y="218"/>
+        <di:waypoint x="800" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_SO1_di" bpmnElement="SequenceFlow_SO1">
+        <di:waypoint x="825" y="193"/>
+        <di:waypoint x="825" y="140"/>
+        <di:waypoint x="920" y="140"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_SO2_di" bpmnElement="SequenceFlow_SO2">
+        <di:waypoint x="825" y="243"/>
+        <di:waypoint x="825" y="300"/>
+        <di:waypoint x="920" y="300"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_SO1_Complete_di" bpmnElement="SequenceFlow_SO1_Complete">
+        <di:waypoint x="1020" y="140"/>
+        <di:waypoint x="1125" y="140"/>
+        <di:waypoint x="1125" y="193"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_SO2_Complete_di" bpmnElement="SequenceFlow_SO2_Complete">
+        <di:waypoint x="1020" y="300"/>
+        <di:waypoint x="1125" y="300"/>
+        <di:waypoint x="1125" y="243"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_5_di" bpmnElement="SequenceFlow_5">
+        <di:waypoint x="1150" y="218"/>
+        <di:waypoint x="1220" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+      <bpmndi:BPMNEdge id="SequenceFlow_6_di" bpmnElement="SequenceFlow_6">
+        <di:waypoint x="1320" y="218"/>
+        <di:waypoint x="1390" y="218"/>
+      </bpmndi:BPMNEdge>
+      
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  
+</bpmn2:definitions>
+
+<!-- Made with Bob -->

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20240513/MODEL/" expressionLanguage="https://www.omg.org/spec/DMN/20240513/FEEL/" namespace="https://kie.org/dmn/_4106806D-A72C-48E1-A4CF-9762339DE869" id="_0E6E6905-28ED-4D19-B337-1A173482CD14" name="DMN_F13C3CD3-3004-436D-A784-931139CA356F" xmlns:dmndi="https://www.omg.org/spec/DMN/20230324/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:kie="https://kie.org/dmn/extensions/1.0">
+  <decision name="Discount Rate" id="_BD5B1893-9324-4EBA-8F56-42C744046A46">
+    <variable name="Discount Rate" id="_13FFF7C0-AF96-485A-B089-9E19DFDD006C" typeRef="number" />
+    <informationRequirement id="_7514477D-2D73-4EE5-AAFA-E0F7CE79AD60">
+      <requiredInput href="#_08645B22-43D6-4628-83CB-6EE17489AB76" />
+    </informationRequirement>
+    <informationRequirement id="_4A5F85EB-F34D-471D-98CC-AAE0C01739A4">
+      <requiredInput href="#_CD858F07-9966-436C-871D-7B0C459548A6" />
+    </informationRequirement>
+    <decisionTable id="_33866F4F-BD9B-478B-AD62-9323641024A4" typeRef="number" hitPolicy="UNIQUE" label="Discount Rate">
+      <input id="_E83A7AC0-F3DD-45EB-99CE-258DC390CCF0">
+        <inputExpression id="_402BCAB2-AF8B-4210-A610-069832B768FB" typeRef="number">
+          <text>Order Amount</text>
+        </inputExpression>
+      </input>
+      <input id="_33421ECA-B049-4FA7-8901-2B7DB3C4BD31">
+        <inputExpression id="_503D6368-7157-4833-840E-702D37E2A5B5" typeRef="string">
+          <text>Customer Grade</text>
+        </inputExpression>
+      </input>
+      <output id="_33130D8B-BEF3-4037-BEE5-BCD93064AA4A" />
+      <annotation name="Annotations" />
+      <rule id="_901740BA-9F98-4BB7-A659-DB5C3C3B5FCA">
+        <inputEntry id="_9A85276D-5D4E-4518-9335-EBB43DD7615A">
+          <text>&gt;= 1000000</text>
+        </inputEntry>
+        <inputEntry id="_9FAD2103-8977-4D03-9370-5A94C3EDB1EE">
+          <text>&quot;VIP&quot;</text>
+        </inputEntry>
+        <outputEntry id="_8CA11C60-A8B5-4C95-9872-8127E282F1FF">
+          <text>15</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>VIP 대량주문 15%</text>
+        </annotationEntry>
+      </rule>
+      <rule id="_855AE7FE-9E0A-4B3A-9681-9E08919DF7FB">
+        <inputEntry id="_3F708828-8BAB-4C02-B26D-29B37F1B3C5D">
+          <text>&gt;= 1000000</text>
+        </inputEntry>
+        <inputEntry id="_F652DA72-A643-4E38-83EA-4766FF84E298">
+          <text>&quot;GOLD&quot;</text>
+        </inputEntry>
+        <outputEntry id="_38758DE5-680A-4051-A4D0-D29821F011A0">
+          <text>10</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>GOLD 대량주문 10%</text>
+        </annotationEntry>
+      </rule>
+      <rule id="_D278652C-4ED1-4070-B38E-C8F178531956">
+        <inputEntry id="_60A0C8E4-6C43-4D94-A69B-B33E0DB6F4E0">
+          <text>&gt;= 500000</text>
+        </inputEntry>
+        <inputEntry id="_5E706F3B-15E1-4006-BFD2-12FB00F6FC4B">
+          <text>&quot;VIP&quot;</text>
+        </inputEntry>
+        <outputEntry id="_161F6E52-C3C0-45B1-B035-3945A8D3D6AD">
+          <text>10</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>VIP 대량주문 10%</text>
+        </annotationEntry>
+      </rule>
+      <rule id="_E8906501-2021-4220-B99A-4A3EBB42B244">
+        <inputEntry id="_CDEFFBFD-42E0-4719-B9AD-D5E47E734F68">
+          <text>&gt;= 500000</text>
+        </inputEntry>
+        <inputEntry id="_D6A57490-7B0A-4AE9-A0CF-83AEB456D959">
+          <text>&quot;GOLD&quot;</text>
+        </inputEntry>
+        <outputEntry id="_F9ADACB2-6697-4DF4-A590-2A3032468934">
+          <text>7</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>GOLD 중량주문 7%</text>
+        </annotationEntry>
+      </rule>
+      <rule id="_171908AB-8068-453C-AC37-1657F731E395">
+        <inputEntry id="_3F6BD14D-1B37-49FC-A1D4-CBC487CEE341">
+          <text>&gt;= 500000</text>
+        </inputEntry>
+        <inputEntry id="_85A748B5-187A-4CDD-88FE-BC67A0B0CB5F">
+          <text>&quot;SILVER&quot;</text>
+        </inputEntry>
+        <outputEntry id="_949FB47A-99BA-424E-9DF3-B8817C96BE11">
+          <text>5</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>SILVER 중량주문 5%</text>
+        </annotationEntry>
+      </rule>
+      <rule id="_AFF3836C-F463-4470-881A-8D69D976E7EF">
+        <inputEntry id="_6C7AF845-EA8F-4890-8802-1D0CA6224E77">
+          <text>&lt; 500000</text>
+        </inputEntry>
+        <inputEntry id="_3922D606-7821-493E-B58B-40B227C8C3C3">
+          <text>&quot;VIP&quot;</text>
+        </inputEntry>
+        <outputEntry id="_46F41574-0A82-4D70-B812-0A48E0AB7FA4">
+          <text>5</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>VIP 일반주문 5%</text>
+        </annotationEntry>
+      </rule>
+      <rule id="_1A70E03B-9450-494D-8AC5-55EAE25F7110">
+        <inputEntry id="_12085591-D69D-427C-857E-1B6CC44DF90C">
+          <text>&lt; 500000</text>
+        </inputEntry>
+        <inputEntry id="_63863E96-54C5-42B0-B44A-7A7A7F0F869D">
+          <text>&quot;GOLD&quot;</text>
+        </inputEntry>
+        <outputEntry id="_2BDCD54A-985C-4AE8-B6B4-F96BE4E1ABB9">
+          <text>3</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>GOLD 일반주문 3%</text>
+        </annotationEntry>
+      </rule>
+      <rule id="_F46168E2-AD67-4FAC-B34D-24A871B6CF00">
+        <inputEntry id="_E0C9EA50-CAEB-46D3-A8A7-6E088BFD333D">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="_611506FC-52FC-4F52-AFDD-13652412A06F">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="_933F93DA-A004-461D-B9B4-6898B6AB0814">
+          <text>0</text>
+        </outputEntry>
+        <annotationEntry>
+          <text>기본 할인 없음</text>
+        </annotationEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <inputData name="Order Amount" id="_08645B22-43D6-4628-83CB-6EE17489AB76">
+    <variable name="Order Amount" id="_8D92F884-B075-4D3D-9015-D33FF611DC36" typeRef="number" />
+  </inputData>
+  <inputData name="Customer Grade" id="_CD858F07-9966-436C-871D-7B0C459548A6">
+    <variable name="Customer Grade" id="_8D0FE5B8-8FD7-432E-9186-F1425E64C636" typeRef="string" />
+  </inputData>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="_40971948-7897-4FD8-9195-78779112857E" name="Default DRD" useAlternativeInputDataShape="true">
+      <di:extension>
+        <kie:ComponentsWidthsExtension>
+          <kie:ComponentWidths dmnElementRef="_33866F4F-BD9B-478B-AD62-9323641024A4">
+            <kie:width>60</kie:width>
+            <kie:width>118</kie:width>
+            <kie:width>118</kie:width>
+            <kie:width>118</kie:width>
+            <kie:width>240</kie:width>
+          </kie:ComponentWidths>
+        </kie:ComponentsWidthsExtension>
+      </di:extension>
+      <dmndi:DMNShape id="_5E02AD84-2402-47F9-9980-174BA308C300" dmnElementRef="_08645B22-43D6-4628-83CB-6EE17489AB76" isCollapsed="false" isListedInputData="false">
+        <dc:Bounds x="332" y="292" width="160" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="_13538705-E244-41F3-8B8D-6FFA4021E024" dmnElementRef="_CD858F07-9966-436C-871D-7B0C459548A6" isCollapsed="false" isListedInputData="false">
+        <dc:Bounds x="112" y="292" width="160" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="_C1E1E0C0-7D58-4F22-BDD5-2A694BD92D2D" dmnElementRef="_BD5B1893-9324-4EBA-8F56-42C744046A46" isCollapsed="false" isListedInputData="false">
+        <dc:Bounds x="240" y="120" width="160" height="80" />
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="_4D67B2FB-EFB0-4F60-B415-46E9271A55C3" dmnElementRef="_7514477D-2D73-4EE5-AAFA-E0F7CE79AD60" sourceElement="_5E02AD84-2402-47F9-9980-174BA308C300" targetElement="_C1E1E0C0-7D58-4F22-BDD5-2A694BD92D2D">
+        <di:waypoint x="412" y="292" />
+        <di:waypoint x="320" y="200" />
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge id="_01C0798D-2275-4706-BC2C-C158F8F5BE53" dmnElementRef="_4A5F85EB-F34D-471D-98CC-AAE0C01739A4" sourceElement="_13538705-E244-41F3-8B8D-6FFA4021E024" targetElement="_C1E1E0C0-7D58-4F22-BDD5-2A694BD92D2D">
+        <di:waypoint x="192" y="292" />
+        <di:waypoint x="320" y="200" />
+      </dmndi:DMNEdge>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>

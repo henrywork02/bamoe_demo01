@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dmn:definitions xmlns:dmn="http://www.omg.org/spec/DMN/20180521/MODEL/" 
+                 xmlns:dmndi="http://www.omg.org/spec/DMN/20180521/DMNDI/" 
+                 xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" 
+                 xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" 
+                 xmlns:kie="http://www.drools.org/kie/dmn/1.2"
+                 id="Definitions_payment_decision" 
+                 name="Payment Decision Definitions" 
+                 namespace="https://kie.org/dmn/_payment-decision" 
+                 exporter="BAMOE" 
+                 exporterVersion="1.0">
+  
+  <dmn:decision id="paymentDecision" name="Payment Decision">
+    <dmn:extensionElements>
+      <kie:componentWidthsExtension>
+        <kie:componentWidths dmnElementRef="DecisionTable_1">
+          <kie:width>150</kie:width>
+          <kie:width>150</kie:width>
+          <kie:width>150</kie:width>
+          <kie:width>150</kie:width>
+          <kie:width>300</kie:width>
+        </kie:componentWidths>
+      </kie:componentWidthsExtension>
+    </dmn:extensionElements>
+    
+    <dmn:variable id="DecisionVariable_1" name="Payment Decision" typeRef="tPaymentResult"/>
+    
+    <dmn:informationRequirement id="InformationRequirement_1">
+      <dmn:requiredInput href="#InputData_OrderAmount"/>
+    </dmn:informationRequirement>
+    
+    <dmn:informationRequirement id="InformationRequirement_2">
+      <dmn:requiredInput href="#InputData_CustomerType"/>
+    </dmn:informationRequirement>
+    
+    <dmn:informationRequirement id="InformationRequirement_3">
+      <dmn:requiredInput href="#InputData_CreditScore"/>
+    </dmn:informationRequirement>
+    
+    <dmn:decisionTable id="DecisionTable_1" hitPolicy="FIRST" preferredOrientation="Rule-as-Row">
+      <dmn:input id="Input_1" label="Order Amount">
+        <dmn:inputExpression id="InputExpression_1" typeRef="number">
+          <dmn:text>productOrder.totalAmount</dmn:text>
+        </dmn:inputExpression>
+      </dmn:input>
+      
+      <dmn:input id="Input_2" label="Customer Type">
+        <dmn:inputExpression id="InputExpression_2" typeRef="string">
+          <dmn:text>productOrder.customerType</dmn:text>
+        </dmn:inputExpression>
+        <dmn:inputValues id="InputValues_2">
+          <dmn:text>"VIP","REGULAR","NEW"</dmn:text>
+        </dmn:inputValues>
+      </dmn:input>
+      
+      <dmn:input id="Input_3" label="Credit Score">
+        <dmn:inputExpression id="InputExpression_3" typeRef="number">
+          <dmn:text>productOrder.creditScore</dmn:text>
+        </dmn:inputExpression>
+      </dmn:input>
+      
+      <dmn:output id="Output_1" label="Approved" name="approved" typeRef="boolean"/>
+      <dmn:output id="Output_2" label="Reason" name="reason" typeRef="string"/>
+      
+      <dmn:rule id="DecisionRule_1">
+        <dmn:inputEntry id="InputEntry_1_1">
+          <dmn:text>< 100000</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_1_2">
+          <dmn:text>-</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_1_3">
+          <dmn:text>>= 600</dmn:text>
+        </dmn:inputEntry>
+        <dmn:outputEntry id="OutputEntry_1_1">
+          <dmn:text>true</dmn:text>
+        </dmn:outputEntry>
+        <dmn:outputEntry id="OutputEntry_1_2">
+          <dmn:text>"자동 승인 - 소액 주문"</dmn:text>
+        </dmn:outputEntry>
+      </dmn:rule>
+      
+      <dmn:rule id="DecisionRule_2">
+        <dmn:inputEntry id="InputEntry_2_1">
+          <dmn:text>>= 100000</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_2_2">
+          <dmn:text>"VIP"</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_2_3">
+          <dmn:text>>= 700</dmn:text>
+        </dmn:inputEntry>
+        <dmn:outputEntry id="OutputEntry_2_1">
+          <dmn:text>true</dmn:text>
+        </dmn:outputEntry>
+        <dmn:outputEntry id="OutputEntry_2_2">
+          <dmn:text>"자동 승인 - VIP 고객"</dmn:text>
+        </dmn:outputEntry>
+      </dmn:rule>
+      
+      <dmn:rule id="DecisionRule_3">
+        <dmn:inputEntry id="InputEntry_3_1">
+          <dmn:text>>= 100000</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_3_2">
+          <dmn:text>"REGULAR"</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_3_3">
+          <dmn:text>>= 750</dmn:text>
+        </dmn:inputEntry>
+        <dmn:outputEntry id="OutputEntry_3_1">
+          <dmn:text>true</dmn:text>
+        </dmn:outputEntry>
+        <dmn:outputEntry id="OutputEntry_3_2">
+          <dmn:text>"자동 승인 - 우수 신용"</dmn:text>
+        </dmn:outputEntry>
+      </dmn:rule>
+      
+      <dmn:rule id="DecisionRule_4">
+        <dmn:inputEntry id="InputEntry_4_1">
+          <dmn:text>>= 100000</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_4_2">
+          <dmn:text>"REGULAR"</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_4_3">
+          <dmn:text>< 750</dmn:text>
+        </dmn:inputEntry>
+        <dmn:outputEntry id="OutputEntry_4_1">
+          <dmn:text>false</dmn:text>
+        </dmn:outputEntry>
+        <dmn:outputEntry id="OutputEntry_4_2">
+          <dmn:text>"거부 - 신용 점수 부족"</dmn:text>
+        </dmn:outputEntry>
+      </dmn:rule>
+      
+      <dmn:rule id="DecisionRule_5">
+        <dmn:inputEntry id="InputEntry_5_1">
+          <dmn:text>>= 100000</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_5_2">
+          <dmn:text>"NEW"</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_5_3">
+          <dmn:text>-</dmn:text>
+        </dmn:inputEntry>
+        <dmn:outputEntry id="OutputEntry_5_1">
+          <dmn:text>false</dmn:text>
+        </dmn:outputEntry>
+        <dmn:outputEntry id="OutputEntry_5_2">
+          <dmn:text>"거부 - 신규 고객 고액 주문"</dmn:text>
+        </dmn:outputEntry>
+      </dmn:rule>
+      
+      <dmn:rule id="DecisionRule_6">
+        <dmn:inputEntry id="InputEntry_6_1">
+          <dmn:text>-</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_6_2">
+          <dmn:text>-</dmn:text>
+        </dmn:inputEntry>
+        <dmn:inputEntry id="InputEntry_6_3">
+          <dmn:text>< 600</dmn:text>
+        </dmn:inputEntry>
+        <dmn:outputEntry id="OutputEntry_6_1">
+          <dmn:text>false</dmn:text>
+        </dmn:outputEntry>
+        <dmn:outputEntry id="OutputEntry_6_2">
+          <dmn:text>"거부 - 낮은 신용 점수"</dmn:text>
+        </dmn:outputEntry>
+      </dmn:rule>
+    </dmn:decisionTable>
+  </dmn:decision>
+  
+  <dmn:inputData id="InputData_OrderAmount" name="Order Amount">
+    <dmn:variable id="InputVariable_1" name="Order Amount" typeRef="number"/>
+  </dmn:inputData>
+  
+  <dmn:inputData id="InputData_CustomerType" name="Customer Type">
+    <dmn:variable id="InputVariable_2" name="Customer Type" typeRef="string"/>
+  </dmn:inputData>
+  
+  <dmn:inputData id="InputData_CreditScore" name="Credit Score">
+    <dmn:variable id="InputVariable_3" name="Credit Score" typeRef="number"/>
+  </dmn:inputData>
+  
+  <dmn:itemDefinition id="tPaymentResult" name="tPaymentResult" isCollection="false">
+    <dmn:itemComponent id="ItemComponent_1" name="approved" isCollection="false">
+      <dmn:typeRef>boolean</dmn:typeRef>
+    </dmn:itemComponent>
+    <dmn:itemComponent id="ItemComponent_2" name="reason" isCollection="false">
+      <dmn:typeRef>string</dmn:typeRef>
+    </dmn:itemComponent>
+  </dmn:itemDefinition>
+  
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_1" name="Payment Decision Diagram">
+      <dmndi:DMNShape id="DMNShape_Decision_1" dmnElementRef="paymentDecision">
+        <dc:Bounds x="300" y="100" width="180" height="80"/>
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_Input_1" dmnElementRef="InputData_OrderAmount">
+        <dc:Bounds x="100" y="250" width="150" height="60"/>
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_Input_2" dmnElementRef="InputData_CustomerType">
+        <dc:Bounds x="300" y="250" width="150" height="60"/>
+      </dmndi:DMNShape>
+      <dmndi:DMNShape id="DMNShape_Input_3" dmnElementRef="InputData_CreditScore">
+        <dc:Bounds x="500" y="250" width="150" height="60"/>
+      </dmndi:DMNShape>
+      <dmndi:DMNEdge id="DMNEdge_1" dmnElementRef="InformationRequirement_1">
+        <di:waypoint x="175" y="250"/>
+        <di:waypoint x="360" y="180"/>
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge id="DMNEdge_2" dmnElementRef="InformationRequirement_2">
+        <di:waypoint x="375" y="250"/>
+        <di:waypoint x="390" y="180"/>
+      </dmndi:DMNEdge>
+      <dmndi:DMNEdge id="DMNEdge_3" dmnElementRef="InformationRequirement_3">
+        <di:waypoint x="575" y="250"/>
+        <di:waypoint x="420" y="180"/>
+      </dmndi:DMNEdge>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</dmn:definitions>

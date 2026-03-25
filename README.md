@@ -4,7 +4,7 @@
   Copyright IBM Corp. 2025
 -->
 
-# `<Your project's title>`
+# `BAMOE demo 01 - 'Quarkas'`
 
 > _This project was auto-generated from the BAMOE Canvas Accelerator `Quarkus (Full)`, and enables Processes, Decisions, and Rules. It's built on [Quarkus](https://quarkus.io/), the Supersonic Subatomic Java Framework._
 >
@@ -12,7 +12,7 @@
 
 # Description
 
-`<Your project's description>`
+``BAMOE demo 01 / 'Quarkas'`
 
 # Building and running
 
